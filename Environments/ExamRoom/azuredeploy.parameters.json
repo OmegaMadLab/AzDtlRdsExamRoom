@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "_artifactsLocation": {
-      "value": "https://raw.githubusercontent.com/OmegaMadLab/RDS-Templates/master/rds-deployment-existing-ad/"
+      "value": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/environments/examroom/"
     },
     "dnsLabelPrefix": {
       "value": "sj-obinu-rdp"
