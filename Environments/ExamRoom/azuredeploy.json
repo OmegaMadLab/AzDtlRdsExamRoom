@@ -61,7 +61,7 @@
         "description": "A prefix which will identity all the classroom resources"
       }
     },
-    "_artifactsLocation": {
+    "externalFileRepo": {
       "type": "string",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
@@ -360,7 +360,7 @@
               "autoUpgradeMinorVersion": true,
               "settings": {
                   "fileUris": [
-                      "[concat(parameters('_artifactsLocation'), '/Scripts/', variables('srvManScript'))]"
+                      "[concat(parameters('externalFileRepo'), '/Scripts/', variables('srvManScript'))]"
                   ],
                   "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ./', variables('srvManScript'), variables('srvManParams'))]"
               }
@@ -382,7 +382,7 @@
           "typeHandlerVersion": "2.11",
           "autoUpgradeMinorVersion": true,
           "settings": {
-            "ModulesUrl": "[concat(parameters('_artifactsLocation'),'/DSC/Configuration.zip')]",
+            "ModulesUrl": "[concat(parameters('externalFileRepo'),'/DSC/Configuration.zip')]",
             "ConfigurationFunction": "Configuration.ps1\\RDSConsole",
             "Properties": {
               "DomainName": "[parameters('existingDomainName')]",
@@ -467,7 +467,7 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(parameters('_artifactsLocation'),'/DSC/Configuration.zip')]",
+              "ModulesUrl": "[concat(parameters('externalFileRepo'),'/DSC/Configuration.zip')]",
               "ConfigurationFunction": "Configuration.ps1\\SessionHost",
               "Properties": {
                 "DomainName": "[parameters('existingDomainName')]",
@@ -552,7 +552,7 @@
                   "autoUpgradeMinorVersion": true,
                   "settings": {
                       "fileUris": [
-                          "[concat(parameters('_artifactsLocation'), '/Scripts/', variables('srvManScript'))]"
+                          "[concat(parameters('externalFileRepo'), '/Scripts/', variables('srvManScript'))]"
                       ],
                       "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ./', variables('srvManScript'), variables('srvManParams'))]"
                   }
@@ -576,7 +576,7 @@
         "typeHandlerVersion": "2.11",
         "autoUpgradeMinorVersion": true,
         "settings": {
-          "modulesUrl": "[concat(parameters('_artifactsLocation'),'/DSC/Configuration.zip')]",
+          "modulesUrl": "[concat(parameters('externalFileRepo'),'/DSC/Configuration.zip')]",
           "configurationFunction": "Configuration.ps1\\RDSDeployment",
           "Properties": {
             "adminCreds": {
