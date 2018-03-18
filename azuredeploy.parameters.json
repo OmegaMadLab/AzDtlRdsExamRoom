@@ -1,0 +1,36 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "value": "https://raw.githubusercontent.com/OmegaMadLab/RDS-Templates/master/rds-deployment-existing-ad/"
+    },
+    "dnsLabelPrefix": {
+      "value": "sj-obinu-rdp"
+    },
+    "existingAdminPassword": {
+      "value": "$oftJam.9!2018"
+    },
+    "existingAdminUsername": {
+      "value": "sjadmin"
+    },
+    "existingDomainName": {
+      "value": "sj.local"
+    },
+    "existingVnetName": {
+      "value": "dtl-vnet"
+    },
+    "imageSKU": {
+      "value": "2012-R2-Datacenter"
+    },
+    "numberOfStudents": {
+      "value": 4
+    },
+    "VmSize": {
+      "value": "Standard_DS2_v2"
+    },
+    "examPrefix": {
+        "value": "GenExam"
+    }
+  }
+}
