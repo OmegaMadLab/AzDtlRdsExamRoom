@@ -1,7 +1,7 @@
 {
-  "itemDisplayName": "RDS farm deployment using existing active directory",
-  "description": "This template creates a RDS farm deployment using existing active directory in same resource group",
-  "summary": "Creates and deploys fully functional RDS farm deployment using existing active directory in same resource group",
-  "githubUsername": "MahendraAgrawal",
-  "dateUpdated": "2016-10-12"
+  "itemDisplayName": "Exam room RDS farm deployment using existing active directory",
+  "description": "This template creates an Exam Room RDS farm deployment using existing active directory in another resource group",
+  "summary": "Creates and deploys fully functional RDS farm deployment using existing active directory in another resource group",
+  "githubUsername": "OmegaMadLab",
+  "dateUpdated": "2018-03-18"
 }
