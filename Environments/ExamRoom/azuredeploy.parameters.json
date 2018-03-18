@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "externalFileRepo": {
-      "value": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/environments/examroom/"
+      "value": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Environments/ExamRoom"
     },
     "dnsLabelPrefix": {
       "value": "sj-obinu-rdp"
