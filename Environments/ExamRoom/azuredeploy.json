@@ -15,13 +15,6 @@
       },
       "defaultValue": "contoso.com"
     },
-    "existingVnetName": {
-      "type": "string",
-      "defaultValue": "vnet",
-      "metadata": {
-        "description": "The VNET name of AD domain. For example johnvnet1"
-      }
-    },
     "existingAdminUserName": {
       "type": "string",
       "metadata": {

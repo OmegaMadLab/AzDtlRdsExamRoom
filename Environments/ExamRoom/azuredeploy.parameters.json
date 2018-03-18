@@ -17,9 +17,6 @@
     "existingDomainName": {
       "value": "sj.local"
     },
-    "existingVnetName": {
-      "value": "dtl-vnet"
-    },
     "imageSKU": {
       "value": "2012-R2-Datacenter"
     },
