@@ -34,10 +34,8 @@ function install-WinFeature ()
             Install-WindowsFeature -Name $RequiredFeature -IncludeAllSubFeature $includeSubFeatures -IncludeManagementTools $includeManagementTools
         }
         catch {
+            Write-Error $_.Exception
             Write-Error "Result: Failed to install required feature $RequiredFeature."
-            Write-Error $_.Exception.ItemName
-            Write-Error $_.Exception.Message
-            Break
         }
     }
 
