@@ -25,12 +25,12 @@
     },
     "includeManagementTools": {
       "type": "string",
-      "displayName": "Install sub features",
+      "displayName": "Install management tools",
       "allowedValues": [
         "yes",
         "no"
       ],
-      "description": "Automatically install sub features, if needed."
+      "description": "Install management tools, if available."
     }
   },
   "runCommand": {
