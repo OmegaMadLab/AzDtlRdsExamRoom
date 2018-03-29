@@ -1,4 +1,4 @@
-{
+){
   "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
   "title": "Install Windows Feature",
   "description": "Install specified Windows Features and reboots the machine. Needs a server operating system.",
@@ -34,7 +34,7 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./artifact-main.ps1', ' -windowsFeatureList ''', parameters('windowsFeatureList'), ''' -includeSubFeatures ', if(equals(parameters('includeSubFeatures'),'yes'), bool('true'), bool('false'), ' -includeManagementTools ', if(equals(parameters('includeManagementTools'),'yes'), bool('true'), bool('false'), '\"')]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./artifact-main.ps1', ' -windowsFeatureList ''', parameters('windowsFeatureList'), ''' -includeSubFeatures ', if(equals(parameters('includeSubFeatures'),'yes'), bool('true'), bool('false')), ' -includeManagementTools ', if(equals(parameters('includeManagementTools'),'yes'), bool('true'), bool('false')), '\"')]"
   },
   "postDeployActions": [
     {
