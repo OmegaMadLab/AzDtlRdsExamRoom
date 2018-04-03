@@ -31,7 +31,7 @@ function install-WinFeature ()
 
     foreach($RequiredFeature in $RequiredFeatures) {
         try {
-            Install-WindowsFeature -Name $RequiredFeature -IncludeAllSubFeature $includeSubFeatures -IncludeManagementTools $includeManagementTools
+            Install-WindowsFeature -Name $RequiredFeature -IncludeAllSubFeature:$includeSubFeatures -IncludeManagementTools:$includeManagementTools
         }
         catch {
             Write-Error $_.Exception

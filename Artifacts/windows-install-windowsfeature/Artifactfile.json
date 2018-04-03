@@ -34,7 +34,7 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./artifact-main.ps1', ' -windowsFeatureList ''', parameters('windowsFeatureList'), ''' -includeSubFeatures ', if(equals(parameters('includeSubFeatures'),'yes'), bool('true'), bool('false')), ' -includeManagementTools ', if(equals(parameters('includeManagementTools'),'yes'), bool('true'), bool('false')), '\"')]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./artifact-main.ps1', ' -windowsFeatureList ''', parameters('windowsFeatureList'), ''' -includeSubFeatures ', if(equals(parameters('includeSubFeatures'),'yes'), bool('\$true'), bool('\$false')), ' -includeManagementTools ', if(equals(parameters('includeManagementTools'),'yes'), bool('\$true'), bool('\$false')), '\"')]"
   },
   "postDeployActions": [
     {
