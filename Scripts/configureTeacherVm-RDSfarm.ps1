@@ -10,13 +10,13 @@ Import-Module RemoteDesktop
 #Compose Student VMs array
 $RdsHosts = @()
 for ($i = 0; $i -lt $StudentVmNumber; $i++) {
-    $RdsHosts += "$StudentVmPrefix$StudentVmNumber"
+    $RdsHosts += "$StudentVmPrefix$StudentVmNumber.$DomainName"
 }
 
 #Define RDS Roles servername
-$RdsBrokerSrv = "$env:COMPUTERNAME.$domainName"
-$RdsLicenseSrv = "$env:COMPUTERNAME.$domainName"
-$RdsWebAccessSrv ="$env:COMPUTERNAME.$domainName"
+$RdsBrokerSrv = "$env:COMPUTERNAME.$DomainName"
+$RdsLicenseSrv = "$env:COMPUTERNAME.$DomainName"
+$RdsWebAccessSrv ="$env:COMPUTERNAME.$DomainName"
 
 #Create a basic RDS deployment
 $RdsParams = @{
