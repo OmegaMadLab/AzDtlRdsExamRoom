@@ -49,7 +49,7 @@
             "commandToExecute": ""
         },
         "protectedSettings": {
-            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./configureTeacherVm-RDSfarm.ps1', ' -DomainName \"', parameters('DomainName'), '\" -DomainAdminName \"', parameters('DomainAdminName'), '\" -DomainAdminPassword \"', parameters('DomainAdminPassword'), '\" -StudentVmPrefix \"', parameters('StudentVmPrefix'), '\" -StudentVmCount ', parameters('StudentVmCount'), '\"')]"
+            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./configureTeacherVm-RDSfarm.ps1', ' -DomainName ''', parameters('DomainName'), ''' -DomainAdminName ''', parameters('DomainAdminName'), ''' -DomainAdminPassword ''', parameters('DomainAdminPassword'), ''' -StudentVmPrefix ''', parameters('StudentVmPrefix'), ''' -StudentVmCount ', parameters('StudentVmCount'), '\"')]"
         }
     }
 }
