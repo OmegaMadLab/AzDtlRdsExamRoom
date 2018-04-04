@@ -10,7 +10,8 @@ Import-Module RemoteDesktop
 #Compose Student VMs array
 $RdsHosts = @()
 for ($i = 0; $i -lt $StudentVmNumber; $i++) {
-    $RdsHosts += "$StudentVmPrefix$StudentVmNumber.$DomainName"
+    $VmIndex = ($i.ToString()).PadLeft(2,"0")
+    $RdsHosts += "$StudentVmPrefix$VmIndex.$DomainName"
 }
 
 #Define RDS Roles servername
