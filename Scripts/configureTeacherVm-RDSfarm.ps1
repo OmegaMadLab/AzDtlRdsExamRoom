@@ -19,6 +19,9 @@ $RdsBrokerSrv = "$env:COMPUTERNAME.$DomainName"
 $RdsLicenseSrv = "$env:COMPUTERNAME.$DomainName"
 $RdsWebAccessSrv ="$env:COMPUTERNAME.$DomainName"
 
+#Test
+Invoke-Command -ComputerName 'VMTestSJ00' -ScriptBlock { hostname }
+
 #Create a basic RDS deployment
 $RdsParams = @{
     ConnectionBroker = $RdsBrokerSrv;
