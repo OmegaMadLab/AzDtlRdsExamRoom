@@ -32,17 +32,8 @@ $ScriptBlock = {
         $RdsLic,
         $RdsWA
     )
-    
-    Write-Output "RDSHosts:" $RdsHosts
-    Write-Output "RDSBroker:" $RdsBroker
-    Write-Output "RdsLic:" $RdsLic
-    Write-Output "RdsWA:" $RdsWA
 
     Import-Module RemoteDesktop
-
-    Write-Output $env:USERNAME $env:USERDNSDOMAIN
-
-    #Enable-PSRemoting -Verbose -Force
 
     $RdsParams = @{
         ConnectionBroker = $RdsBroker;
@@ -75,8 +66,11 @@ $PsSession = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credenti
 
 Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
 
-#Invoke-Command -Session $PsSession -ScriptBlock { hostname } -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
+./New-ServerManagerConfig -DomainName $DomainName -RdsVm $env:COMPUTERNAME -StudentVmPrefix $StudentVmPrefix -StudentVmNumber $StudentVmNumber
 
-#$job = Start-Job -Credential $Credential -scriptblock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
+Copy-Item "./Set-ServerManagerConfig.ps1" -Destination "C:\ServerManagerConfig\Set-ServerManagerConfig.ps1" -Force
 
-#Receive-Job $job -Wait
+$action = New-ScheduledTaskAction -Execute 'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe' `
+    -Argument '-ExecutionPolicy Unrestricted -File C:\ServerManagerConfig\Set-ServerManagerConfig.ps1'
+$trigger =  New-ScheduledTaskTrigger -AtLogOn
+Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "LoadServerManagerConfig" -Description "Update server manager config at logon"
