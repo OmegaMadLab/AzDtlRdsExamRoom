@@ -22,27 +22,32 @@ $RdsBrokerSrv = "$env:COMPUTERNAME.$DomainName"
 $RdsLicenseSrv = "$env:COMPUTERNAME.$DomainName"
 $RdsWebAccessSrv ="$env:COMPUTERNAME.$DomainName"
 
-#Test
-Invoke-Command -ComputerName 'VMTestSJ00' -ScriptBlock { hostname } -Credential $Credential
 
 #Create a basic RDS deployment
 $ScriptBlock = {
+
+    param(
+        $RdsHosts,
+        $RdsBroker,
+        $RdsLic,
+        $RdsWA
+    )
     
     Import-Module RemoteDesktop
 
     $RdsParams = @{
-        ConnectionBroker = $using:RdsBrokerSrv;
-        WebAccessServer = $using:RdsWebAccessSrv;
-        SessionHost = $using:RdsHosts;
+        ConnectionBroker = $RdsBroker;
+        WebAccessServer = $RdsWA;
+        SessionHost = $RdsHosts;
     }
 
     New-SessionDeployment @RdsParams
 
     #Configure Licensing
     $RdsLicParams = @{
-        LicenseServer = $using:RdsLicenseSrv;
+        LicenseServer = $RdsLic;
         Mode = "PerUser";
-        ConnectionBroker = $using:RdsBrokerSrv;
+        ConnectionBroker = $RdsBroker;
         Force = $true;
     }
     Set-RDLicenseConfiguration @RdsLicParams
@@ -51,15 +56,10 @@ $ScriptBlock = {
     $RdsCollParams = @{
         CollectionName = "ExamRoom";
         CollectionDescription = "Exam Room"
-        SessionHost = $using:RdsHosts;
-        ConnectionBroker = $using:RdsBrokerSrv;
+        SessionHost = $RdsHosts;
+        ConnectionBroker = $RdsBroker;
     }
     New-RDSessionCollection @RdsCollParams
 }
 
-Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $Credential -ScriptBlock $ScriptBlock
-
-
-
-###Configure Server Manager
-#.\SetServerManager.ps1 -DomainName $env:USERDNSDOMAIN -RdsVm $env:COMPUTERNAME -StudentVmPrefix $StudentVmPrefix -StudentVmNumber $StudentVmNumber
+Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $Credential -ScriptBlock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv)
