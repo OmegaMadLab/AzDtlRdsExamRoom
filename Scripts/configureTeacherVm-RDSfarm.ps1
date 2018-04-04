@@ -33,6 +33,11 @@ $ScriptBlock = {
         $RdsWA
     )
     
+    Write-Output "RDSHosts:" $RdsHosts
+    Write-Output "RDSBroker:" $RdsBroker
+    Write-Output "RdsLic:" $RdsLic
+    Write-Output "RdsWA:" $RdsWA
+
     Import-Module RemoteDesktop
 
     $RdsParams = @{
@@ -41,7 +46,7 @@ $ScriptBlock = {
         SessionHost = $RdsHosts;
     }
 
-    New-RDSessionDeployment @RdsParams
+    New-RDSessionDeployment @RdsParams -Verbose
 
     #Configure Licensing
     $RdsLicParams = @{
@@ -50,7 +55,7 @@ $ScriptBlock = {
         ConnectionBroker = $RdsBroker;
         Force = $true;
     }
-    Set-RDLicenseConfiguration @RdsLicParams
+    Set-RDLicenseConfiguration @RdsLicParams -Verbose
 
     #Create collection
     $RdsCollParams = @{
@@ -59,7 +64,7 @@ $ScriptBlock = {
         SessionHost = $RdsHosts;
         ConnectionBroker = $RdsBroker;
     }
-    New-RDSessionCollection @RdsCollParams
+    New-RDSessionCollection @RdsCollParams -Verbose
 }
 
-Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $Credential -ScriptBlock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv)
+Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $Credential -ScriptBlock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
