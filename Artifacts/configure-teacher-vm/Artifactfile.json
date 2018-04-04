@@ -45,7 +45,7 @@
         "typeHandlerVersion": "1.9",
         "autoUpgradeMinorVersion": "true",
         "settings": {
-            "fileUris": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/configureTeacherVm-RDSfarm.ps1",
+            "fileUris": ["https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/configureTeacherVm-RDSfarm.ps1"],
             "commandToExecute": ""
         },
         "protectedSettings": {
