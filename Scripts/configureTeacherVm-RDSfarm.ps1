@@ -1,10 +1,15 @@
 param (
     [string] $DomainName,
+    [string] $UserName,
+    [string] $Password,
     [string] $StudentVmPrefix,
     [int] $StudentVmNumber    
 )
 
 Import-Module RemoteDesktop
+
+$secpasswd = ConvertTo-SecureString $Password -AsPlainText -Force
+$Credential = New-Object System.Management.Automation.PSCredential ($UserName, $secpasswd)
 
 ###Configure RDS base deployment
 #Compose Student VMs array
@@ -20,35 +25,40 @@ $RdsLicenseSrv = "$env:COMPUTERNAME.$DomainName"
 $RdsWebAccessSrv ="$env:COMPUTERNAME.$DomainName"
 
 #Test
-Invoke-Command -ComputerName 'VMTestSJ00' -ScriptBlock { hostname }
-C:\Windows\system32\whoami.exe
+Invoke-Command -ComputerName 'VMTestSJ00' -ScriptBlock { hostname } -Credential $Credential
 
 #Create a basic RDS deployment
-$RdsParams = @{
-    ConnectionBroker = $RdsBrokerSrv;
-    WebAccessServer = $RdsWebAccessSrv;
-    SessionHost = $RdsHosts;
+$ScriptBlock = {
+    $RdsParams = @{
+        ConnectionBroker = $RdsBrokerSrv;
+        WebAccessServer = $RdsWebAccessSrv;
+        SessionHost = $RdsHosts;
+    }
+
+    New-SessionDeployment @RdsParams
+
+    #Configure Licensing
+    $RdsLicParams = @{
+        LicenseServer = $RdsLicenseSrv;
+        Mode = "PerUser";
+        ConnectionBroker = $RdsBrokerSrv;
+        Force = $true;
+    }
+    Set-RDLicenseConfiguration @RdsLicParams
+
+    #Create collection
+    $RdsCollParams = @{
+        CollectionName = "ExamRoom";
+        CollectionDescription = "Exam Room"
+        SessionHost = $RdsHosts;
+        ConnectionBroker = $RdsBrokerSrv
+    }
+    New-RDSessionCollection @RdsCollParams
 }
 
-New-SessionDeployment @RdsParams
+Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $Credential -ScriptBlock $ScriptBlock
 
-#Configure Licensing
-$RdsLicParams = @{
-    LicenseServer = $RdsLicenseSrv;
-    Mode = "PerUser";
-    ConnectionBroker = $RdsBrokerSrv;
-    Force = $true;
-}
-Set-RDLicenseConfiguration @RdsLicParams
 
-#Create collection
-$RdsCollParams = @{
-    CollectionName = "ExamRoom";
-    CollectionDescription = "Exam Room"
-    SessionHost = $RdsHosts;
-    ConnectionBroker = $RdsBrokerSrv
-}
-New-RDSessionCollection @RdsCollParams
 
 ###Configure Server Manager
 #.\SetServerManager.ps1 -DomainName $env:USERDNSDOMAIN -RdsVm $env:COMPUTERNAME -StudentVmPrefix $StudentVmPrefix -StudentVmNumber $StudentVmNumber
