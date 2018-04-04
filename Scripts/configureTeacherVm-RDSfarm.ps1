@@ -6,8 +6,6 @@ param (
     [int] $StudentVmNumber    
 )
 
-Import-Module RemoteDesktop
-
 $securePass = ConvertTo-SecureString $DomainAdminPassword -AsPlainText -Force
 $Credential = New-Object System.Management.Automation.PSCredential ($DomainAdminName, $securePass)
 
@@ -29,19 +27,22 @@ Invoke-Command -ComputerName 'VMTestSJ00' -ScriptBlock { hostname } -Credential 
 
 #Create a basic RDS deployment
 $ScriptBlock = {
+    
+    Import-Module RemoteDesktop
+
     $RdsParams = @{
-        ConnectionBroker = $RdsBrokerSrv;
-        WebAccessServer = $RdsWebAccessSrv;
-        SessionHost = $RdsHosts;
+        ConnectionBroker = $using:RdsBrokerSrv;
+        WebAccessServer = $using:RdsWebAccessSrv;
+        SessionHost = $using:RdsHosts;
     }
 
     New-SessionDeployment @RdsParams
 
     #Configure Licensing
     $RdsLicParams = @{
-        LicenseServer = $RdsLicenseSrv;
+        LicenseServer = $using:RdsLicenseSrv;
         Mode = "PerUser";
-        ConnectionBroker = $RdsBrokerSrv;
+        ConnectionBroker = $using:RdsBrokerSrv;
         Force = $true;
     }
     Set-RDLicenseConfiguration @RdsLicParams
@@ -50,8 +51,8 @@ $ScriptBlock = {
     $RdsCollParams = @{
         CollectionName = "ExamRoom";
         CollectionDescription = "Exam Room"
-        SessionHost = $RdsHosts;
-        ConnectionBroker = $RdsBrokerSrv
+        SessionHost = $using:RdsHosts;
+        ConnectionBroker = $using:RdsBrokerSrv;
     }
     New-RDSessionCollection @RdsCollParams
 }
