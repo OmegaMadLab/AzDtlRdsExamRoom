@@ -67,7 +67,9 @@ $ScriptBlock = {
     New-RDSessionCollection @RdsCollParams -Verbose
 }
 
-Invoke-Command -ComputerName . -Credential $Credential -ScriptBlock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
+$PsSession = New-PSSession -ComputerName $env:COMPUTERNAME -Credential $Credential
+
+Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
 
 #$job = Start-Job -Credential $Credential -scriptblock $ScriptBlock -ArgumentList ($RdsHosts, $RdsBrokerSrv, $RdsLicenseSrv, $RdsWebAccessSrv) -Verbose
 
