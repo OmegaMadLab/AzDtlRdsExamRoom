@@ -21,6 +21,7 @@ $RdsWebAccessSrv ="$env:COMPUTERNAME.$DomainName"
 
 #Test
 Invoke-Command -ComputerName 'VMTestSJ00' -ScriptBlock { hostname }
+C:\Windows\system32\whoami.exe
 
 #Create a basic RDS deployment
 $RdsParams = @{
