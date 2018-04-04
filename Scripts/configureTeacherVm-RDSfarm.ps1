@@ -40,7 +40,9 @@ $ScriptBlock = {
 
     Import-Module RemoteDesktop
 
-    Enable-PSRemoting -Verbose -Force
+    Write-Output $env:USERNAME $env:USERDNSDOMAIN
+
+    #Enable-PSRemoting -Verbose -Force
 
     $RdsParams = @{
         ConnectionBroker = $RdsBroker;
