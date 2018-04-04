@@ -41,7 +41,7 @@ $ScriptBlock = {
         SessionHost = $RdsHosts;
     }
 
-    New-SessionDeployment @RdsParams
+    New-RDSessionDeployment @RdsParams
 
     #Configure Licensing
     $RdsLicParams = @{
