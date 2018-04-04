@@ -1,15 +1,14 @@
 param (
     [string] $DomainName,
-    [string] $UserName,
-    [string] $Password,
+    [string] $DomainAdminName,
+    [securestring] $DomainAdminPassword,
     [string] $StudentVmPrefix,
     [int] $StudentVmNumber    
 )
 
 Import-Module RemoteDesktop
 
-$secpasswd = ConvertTo-SecureString $Password -AsPlainText -Force
-$Credential = New-Object System.Management.Automation.PSCredential ($UserName, $secpasswd)
+$Credential = New-Object System.Management.Automation.PSCredential ($DomainAdminName, $DomainAdminPassword)
 
 ###Configure RDS base deployment
 #Compose Student VMs array

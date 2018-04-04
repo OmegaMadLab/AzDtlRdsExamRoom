@@ -1,0 +1,55 @@
+{
+    "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
+    "title": "Configure Teacher VM",
+    "description": "Use this to configure a Teacher VM",
+    "publisher": "OmegaMadLab",
+    "tags": [
+        "PowerShell"
+    ],
+    "iconUri": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Artifacts/configure-teacher-vm/powershell.png",
+    "targetOsType": "Windows",
+    "parameters": {
+        "DomainName": {
+            "type": "string",
+            "displayName": "Domain name",
+            "description": "Domain name.",
+            "allowEmpty": false
+        },
+        "DomainAdminName": {
+            "type": "string",
+            "displayName": "Domain admin name",
+            "description": "Name of the user which will be passed to the script.",
+            "allowEmpty": false
+        },
+        "DomainAdminPassword": {
+            "type": "securestring",
+            "displayName": "Domain admin password",
+            "description": "Password of the user which will be passed to the script."
+        },
+        "StudentVmPrefix": {
+            "type": "string",
+            "displayName": "Prefix used for student VMs",
+            "description": "Prefix used for student VMs.",
+            "allowEmpty": false
+        },
+        "StudentVmCount": {
+            "type": "string",
+            "displayName": "Number of student VMs",
+            "description": "Number of student VMs.",
+            "allowEmpty": false
+        }
+    },
+    "runAzureVMExtension": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.9",
+        "autoUpgradeMinorVersion": "true",
+        "settings": {
+            "fileUris": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/configureTeacherVm-RDSfarm.ps1",
+            "commandToExecute": ""
+        },
+        "protectedSettings": {
+            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"&', ' ./configureTeacherVm-RDSfarm.ps1', ' -DomainName ', parameters('DomainName'), ' -DomainAdminName ', parameters('DomainAdminName'), ' -DomainAdminPassword ', parameters('DomainAdminPassword'), ' -StudentVmPrefix ', parameters('StudentVmPrefix'), ' -StudentVmCount ', parameters('StudentVmCount'), '\"')]"
+        }
+    }
+}
