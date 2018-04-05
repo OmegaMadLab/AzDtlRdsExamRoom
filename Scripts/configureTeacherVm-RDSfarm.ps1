@@ -1,8 +1,17 @@
 param (
+    [Parameter(Mandatory)]
     [string] $DomainName,
+
+    [Parameter(Mandatory)]
     [string] $DomainAdminName,
+
+    [Parameter(Mandatory)]
     [string] $DomainAdminPassword,
+
+    [Parameter(Mandatory)]
     [string] $StudentVmPrefix,
+    
+    [Parameter(Mandatory)]
     [int] $StudentVmNumber    
 )
 
@@ -73,5 +82,5 @@ Copy-Item "./Set-ServerManagerConfig.ps1" -Destination "C:\ServerManagerConfig\S
 $action = New-ScheduledTaskAction -Execute 'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe' `
     -Argument '-ExecutionPolicy Unrestricted -File C:\ServerManagerConfig\Set-ServerManagerConfig.ps1'
 $trigger =  New-ScheduledTaskTrigger -AtLogOn
-$principal = New-ScheduledTaskPrincipal -LogonType S4U -RunLevel Highest
+$principal = New-ScheduledTaskPrincipal -UserId $DomainAdminName -LogonType S4U -RunLevel Highest
 Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "LoadServerManagerConfig" -Description "Update server manager config at logon" -Principal $principal
