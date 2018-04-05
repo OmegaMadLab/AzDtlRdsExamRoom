@@ -3,6 +3,12 @@ Import-Module ServerManager
 Enable-WSManCredSSP -Role Client -DelegateComputer $env:COMPUTERNAME -Force
 Enable-WSManCredSSP -Role Server -Force
 
+#the following is used because -delegatecomputer (above) doesn't appear to actually work properly.
+Set-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Credssp\PolicyDefaults\AllowFreshCredentialsDomain -Name WSMan -Value "WSMAN/$env:COMPUTERNAME"
+
+Connect-WSMan -ComputerName $computer 
+Set-Item "WSMAN:\$computer\service\auth\credssp" -Value $true 
+
 #Install RDS Features
 Write-Output "Installing RDS components..."
 Install-WindowsFeature -Name 'RDS-Connection-Broker', 'RDS-Licensing', 'RDS-Web-Access', 'RSAT-RDS-Tools' -IncludeAllSubFeature -IncludeManagementTools 
