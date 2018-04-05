@@ -79,8 +79,21 @@ Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($Rds
 
 Copy-Item "./Set-ServerManagerConfig.ps1" -Destination "C:\ServerManagerConfig\Set-ServerManagerConfig.ps1" -Force
 
-$action = New-ScheduledTaskAction -Execute 'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe' `
-    -Argument '-ExecutionPolicy Unrestricted -File C:\ServerManagerConfig\Set-ServerManagerConfig.ps1'
-$trigger =  New-ScheduledTaskTrigger -AtLogOn
-$principal = New-ScheduledTaskPrincipal -UserId $DomainAdminName -LogonType S4U -RunLevel Highest
-Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "LoadServerManagerConfig" -Description "Update server manager config at logon" -Principal $principal
+
+$ScriptBlock = {
+
+    param(
+        [String]$UserName
+    )
+
+    
+    $action = New-ScheduledTaskAction -Execute 'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe' `
+        -Argument '-ExecutionPolicy Unrestricted -File C:\ServerManagerConfig\Set-ServerManagerConfig.ps1'
+    $trigger =  New-ScheduledTaskTrigger -AtLogOn
+    $principal = New-ScheduledTaskPrincipal -UserId $UserName -LogonType S4U -RunLevel Highest
+
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "LoadServerManagerConfig" -Description "Update server manager config at logon" -Principal $principal
+
+}
+
+Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($DomainAdminName) -Verbose
