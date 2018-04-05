@@ -8,7 +8,14 @@
     ],
     "iconUri": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Artifacts/configure-teacher-vm-prereq/powershell.png",
     "targetOsType": "Windows",
-    "parameters": {    },
+    "parameters": { 
+        "DomainName": {
+            "type": "string",
+            "displayName": "Domain name",
+            "description": "Domain name.",
+            "allowEmpty": false
+        }
+    },
     "runAzureVMExtension": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
