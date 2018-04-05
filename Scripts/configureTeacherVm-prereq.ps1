@@ -6,7 +6,7 @@ param(
 
 Import-Module ServerManager
 
-Enable-WSManCredSSP -Role Client -DelegateComputer *.$DomainName -Force
+Enable-WSManCredSSP -Role Client -DelegateComputer "*.$DomainName" -Force
 Enable-WSManCredSSP -Role Server -Force
 
 $allowed = @("WSMAN/*.$DomainName")
@@ -22,7 +22,7 @@ if (!(Test-Path $key)) {
     mkdir $key
 }
 $i = 1
-$allowed |% {
+$allowed | ForEach-Object {
     # Script does not take into account existing entries in this key
     New-ItemProperty -Path $key -Name $i -Value $_ -PropertyType String -Force
     $i++
