@@ -28,7 +28,7 @@
             "commandToExecute": ""
         },
         "protectedSettings": {
-            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./configureTeacherVm-prereq.ps1\"')]"
+            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./configureTeacherVm-prereq.ps1 -DomainName ', parameters('DomainName'), '\"')]"
         }
     }
 }
