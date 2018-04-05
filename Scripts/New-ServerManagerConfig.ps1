@@ -23,15 +23,17 @@ if($env:COMPUTERNAME -ne $RdsVm) {
 }
 
 #Students machines
-1..($StudentVmNumber) | % {
-    if($env:COMPUTERNAME -ne $RdsVm) {
+for ($i = 1; $i -le $StudentVmNumber; $i++)
+{ 
+    if($i -gt 1) {
         $StudentServer = $xml.ServerList.ServerInfo[0].Clone()
     }
     else {
         $StudentServer = $xml.ServerList.ServerInfo.Clone()
     }
-    $StudentServer.name = $StudentVmPrefix + $_.ToString("D3") + "." + $DomainName
-    $xml.ServerList.AppendChild($StudentServer) }
+    $StudentServer.name = $StudentVmPrefix + $i.ToString("D2") + "." + $DomainName
+    $xml.ServerList.AppendChild($StudentServer) 
+}
 
 if(!(Test-path("C:\ServerManagerConfig"))) {
         New-Item -Path "C:\ServerManagerConfig" -ItemType Directory
