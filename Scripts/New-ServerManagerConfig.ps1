@@ -23,9 +23,9 @@ if($env:COMPUTERNAME -ne $RdsVm) {
 }
 
 #Students machines
-for ($i = 1; $i -le $StudentVmNumber; $i++)
+for ($i = 0; $i -le $StudentVmNumber; $i++)
 { 
-    if($i -gt 1) {
+    if($i -gt 0) {
         $StudentServer = $xml.ServerList.ServerInfo[0].Clone()
     }
     else {
