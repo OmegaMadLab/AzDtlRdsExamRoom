@@ -30,7 +30,6 @@ if($env:COMPUTERNAME -ne $RdsVm) {
     else {
         $StudentServer = $xml.ServerList.ServerInfo.Clone()
     }
-    $StudentServer = $xml.ServerList.ServerInfo[0].Clone()
     $StudentServer.name = $StudentVmPrefix + $_.ToString("D3") + "." + $DomainName
     $xml.ServerList.AppendChild($StudentServer) }
 
