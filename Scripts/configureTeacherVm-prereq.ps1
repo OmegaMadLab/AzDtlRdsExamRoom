@@ -4,7 +4,11 @@ Enable-WSManCredSSP -Role Client -DelegateComputer $env:COMPUTERNAME -Force
 Enable-WSManCredSSP -Role Server -Force
 
 #Install RDS Features
-Install-WindowsFeature -Name 'RDS-Connection-Broker', 'RDS-Licensing', 'RDS-Web-Access', 'RSAT-RDS-Tools' -IncludeAllSubFeature -IncludeManagementTools -Restart -Confirm:$false
+Write-Output "Installing RDS components..."
+Install-WindowsFeature -Name 'RDS-Connection-Broker', 'RDS-Licensing', 'RDS-Web-Access', 'RSAT-RDS-Tools' -IncludeAllSubFeature -IncludeManagementTools 
+
+Write-Output "Enabling PSRemoting..."
+Enable-PSRemoting -Force -verbose
 
 #Check for pending reboot, and eventually restart server
 #Adapted from https://gist.github.com/altrive/5329377
