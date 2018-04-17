@@ -38,6 +38,12 @@
             "metadata": {
                 "description": "The password of the admin, used also to join the domain"
             }
+        },
+        "NumberOfExamRooms": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of Exam Room to define at AD level"
+            }
         }
     },
     "variables": {
@@ -45,7 +51,7 @@
         "VmSku": "2016-datacenter-smalldisk",
         "diagStorageAccountName": "[toLower(take(concat(parameters('VmName'),'diagsa',uniqueString(resourceGroup().id)), 24))]",
         "enablePublicIp": true,
-        "_artifactsLocation": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/EnvironmentPreparation",
+        "_artifactsLocation": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/EnvironmentPreparation/NestedScripts",
         "prepareADconsoleArchiveFolder": "DSCResources",
         "prepareADconsoleArchiveFileName": "prepareADconsole.zip"
     },
@@ -56,7 +62,8 @@
             "apiVersion": "2015-06-15",
             "location": "[resourceGroup().location]",
             "tags": {
-                "displayName": "Diagnostic storage account"
+                "displayName": "Diagnostic storage account",
+                "item": "aaddsConsole"
             },
             "properties": {
                 "accountType": "Standard_LRS"
@@ -69,7 +76,8 @@
             "name": "[concat(parameters('VmName'),'-PIP')]",
             "location": "[resourceGroup().location]",
             "tags": {
-                "displayName": "PublicIPAddress"
+                "displayName": "PublicIPAddress",
+                "item": "aaddsConsole"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -87,7 +95,8 @@
                 "[concat('Microsoft.Network/publicIPAddresses/', parameters('VmName'), '-PIP')]"
             ],
             "tags": {
-                "displayName": "Network Interface"
+                "displayName": "Network Interface",
+                "item": "aaddsConsole"
             },
             "properties": {
                 "ipConfigurations": [
@@ -114,7 +123,8 @@
                 "[concat('Microsoft.Network/networkInterfaces/', parameters('VmName'), '-NIC')]"
             ],
             "tags": {
-                "displayName": "VM"
+                "displayName": "VM",
+                "item": "aaddsConsole"
             },
             "properties": {
                 "hardwareProfile": {
@@ -137,7 +147,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "managedDisk":{
-                            "storageAccountType":"Standard_LRS",
+                            "storageAccountType":"Standard_LRS"
                         }
                     }
                 },
@@ -162,7 +172,8 @@
                     "apiVersion": "2015-06-15",
                     "location": "[resourceGroup().location]",
                     "tags": {
-                        "displayName": "VMAzureDiagnostics"
+                        "displayName": "VMAzureDiagnostics",
+                        "item": "aaddsConsole"
                     },
                     "dependsOn": [
                         "[concat('Microsoft.Compute/virtualMachines/', parameters('VmName'))]"
@@ -184,7 +195,7 @@
                     }
                 },
                 {
-                    "name": "Microsoft.Powershell.DSC",
+                    "name": "prepareADConsole",
                     "type": "extensions",
                     "location": "[resourceGroup().location]",
                     "apiVersion": "2017-12-01",
@@ -192,7 +203,8 @@
                       "[resourceId('Microsoft.Compute/virtualMachines', parameters('VmName'))]"
                     ],
                     "tags": {
-                        "displayName": "prepareADconsole"
+                        "displayName": "prepareADconsole",
+                        "item": "aaddsConsole"
                     },
                     "properties": {
                         "publisher": "Microsoft.Powershell",
@@ -220,6 +232,33 @@
                     }
                 }
             ]
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "concat(parameters('VmName'), 'prepareExamRoomDomainEntities')",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('VmName'), '/extensions/prepareADconsole')]"
+            ],
+            "tags": {
+                "displayName": "prepareExamRoomDomainEntities",
+                "item": "aaddsConsole"
+            },
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/EnvironmentPreparation/NestedScripts/CSEScripts/Create-ExamRoomDomainEntities.ps1"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./Create-ExamRoomDomainEntities.ps1', ' -DomainName ''', parameters('DomainName'), ''' -DomainAdminName ''', parameters('AdminUsername'), ''' -DomainAdminPassword ''', parameters('AdminPassword'), ''' -NumberOfExamRooms ''', parameters('NumberOfExamRooms'), '\"')]"
+                }
+            }
         }
     ],
     "outputs": {}
