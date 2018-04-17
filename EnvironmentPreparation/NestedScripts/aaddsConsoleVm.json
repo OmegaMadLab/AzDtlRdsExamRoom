@@ -1,0 +1,226 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VmName": {
+           "type": "string",
+           "maxLength": 15,
+           "metadata": {
+                "description": "The name of the VM"
+            }
+        },
+        "VnetName": {
+           "type": "string",
+           "metadata": {
+                "description": "The virtual network you want to use"
+            }
+        },
+        "SubnetName": {
+           "type": "string",
+           "metadata": {
+                "description": "The name of the subnet"
+            }
+        },
+        "DomainName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the domain"
+            }
+        },
+        "AdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the admin, used also to join the domain"
+            }
+        },
+        "AdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password of the admin, used also to join the domain"
+            }
+        }
+    },
+    "variables": {
+        "VmSize": "Standard_A2_v2",
+        "VmSku": "2016-datacenter-smalldisk",
+        "diagStorageAccountName": "[toLower(take(concat(parameters('VmName'),'diagsa',uniqueString(resourceGroup().id)), 24))]",
+        "enablePublicIp": true,
+        "_artifactsLocation": "https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/EnvironmentPreparation",
+        "prepareADconsoleArchiveFolder": "DSCResources",
+        "prepareADconsoleArchiveFileName": "prepareADconsole.zip"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('diagStorageAccountName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "Diagnostic storage account"
+            },
+            "properties": {
+                "accountType": "Standard_LRS"
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "condition": "[variables('enablePublicIp')]",
+            "name": "[concat(parameters('VmName'),'-PIP')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "PublicIPAddress"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(parameters('VmName'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(parameters('VmName'), '-NIC')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', parameters('VmName'), '-PIP')]"
+            ],
+            "tags": {
+                "displayName": "Network Interface"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": "[if(equals(variables('enablePublicIP'), bool('true')), json('null'), json(concat('{\"id\": \"/subscriptions/', subscription().subscriptionId, '/resourceGroups/',toLower(resourceGroup().name), '/providers/Microsoft.Network/publicIPAddresses/', toLower(concat(parameters('VmName'),'-PIP')), '\"}')))]",
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('VnetName')), '/subnets/', parameters('SubnetName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('VmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('diagStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('VmName'), '-NIC')]"
+            ],
+            "tags": {
+                "displayName": "VM"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('VmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('VmName')]",
+                    "adminUsername": "[parameters('AdminUsername')]",
+                    "adminPassword": "[parameters('AdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[variables('VmSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(parameters('VmName'), '-OSDisk')]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage",
+                        "managedDisk":{
+                            "storageAccountType":"Standard_LRS",
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('VmName'), '-NIC'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('http://', toLower(variables('diagStorageAccountName')), '.blob.core.windows.net')]"
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "type": "extensions",
+                    "name": "VMAzureDiagnostics",
+                    "apiVersion": "2015-06-15",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "VMAzureDiagnostics"
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', parameters('VmName'))]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Diagnostics",
+                        "type": "IaaSDiagnostics",
+                        "typeHandlerVersion": "1.5",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "xmlCfg": "[base64('<WadCfg> <DiagnosticMonitorConfiguration overallQuotaInMB=\"4096\" xmlns=\"http: //schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration\"> <DiagnosticInfrastructureLogs scheduledTransferLogLevelFilter=\"Error\"/> <Logs scheduledTransferPeriod=\"PT1M\" scheduledTransferLogLevelFilter=\"Error\" /> <Directories scheduledTransferPeriod=\"PT1M\"> <IISLogs containerName =\"wad-iis-logfiles\" /> <FailedRequestLogs containerName =\"wad-failedrequestlogs\" /> </Directories> <WindowsEventLog scheduledTransferPeriod=\"PT1M\" > <DataSource name=\"Application!*\" /> </WindowsEventLog> <CrashDumps containerName=\"wad-crashdumps\" dumpType=\"Mini\"> <CrashDumpConfiguration processName=\"WaIISHost.exe\"/> <CrashDumpConfiguration processName=\"WaWorkerHost.exe\"/> <CrashDumpConfiguration processName=\"w3wp.exe\"/> </CrashDumps> <PerformanceCounters scheduledTransferPeriod=\"PT1M\"> <PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Available MBytes\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\ISAPI Extension Requests/sec\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\Web Service(_Total)\\Bytes Total/Sec\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Requests/Sec\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET Applications(__Total__)\\Errors Total/Sec\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Requests Queued\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\ASP.NET\\Requests Rejected\" sampleRate=\"PT3M\" /> <PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% Processor Time\" sampleRate=\"PT3M\" /> </PerformanceCounters> </DiagnosticMonitorConfiguration> </WadCfg>')]",
+                            "storageAccount": "[toLower(variables('diagStorageAccountName'))]"
+                        },
+                        "protectedSettings": {
+                            "storageAccountName": "[toLower(variables('diagStorageAccountName'))]",
+                            "storageAccountKey": "[listkeys(variables('diagStorageAccountName'), '2015-06-15').key1]",
+                            "storageAccountEndPoint": "https://core.windows.net"
+                        }
+                    }
+                },
+                {
+                    "name": "Microsoft.Powershell.DSC",
+                    "type": "extensions",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2017-12-01",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Compute/virtualMachines', parameters('VmName'))]"
+                    ],
+                    "tags": {
+                        "displayName": "prepareADconsole"
+                    },
+                    "properties": {
+                        "publisher": "Microsoft.Powershell",
+                        "type": "DSC",
+                        "typeHandlerVersion": "2.75",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "configuration": {
+                            "url": "[concat(variables('_artifactsLocation'), '/', variables('prepareADconsoleArchiveFolder'), '/', variables('prepareADconsoleArchiveFileName'))]",
+                            "script": "prepareADconsole.ps1",
+                            "function": "prepareADconsole"
+                            },
+                            "configurationArguments": {
+                            "DomainName": "[parameters('DomainName')]"
+                            }
+                        },
+                        "protectedSettings": {
+                            "configurationArguments": {
+                            "Admincreds": {
+                                "userName": "[parameters('adminUserName')]",
+                                "Password": "[parameters('adminPassword')]"
+                            }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}
