@@ -70,7 +70,7 @@ configuration prepareADconsole
             ValueName = "1"
             ValueData = "WSMAN/*.$DomainName"
             ValueType = "String"
-            DependsOn = "CredSSP_1"
+            DependsOn = "[Registry]CredSSP_1"
         }
 
         LocalConfigurationManager 
