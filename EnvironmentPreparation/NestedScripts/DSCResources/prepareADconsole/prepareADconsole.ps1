@@ -56,7 +56,7 @@ configuration prepareADconsole
 	        DependsOn = "[xWaitForADDomain]DscForestWait"
         }
 
-        Registry CredSSP_1 {
+        Registry CredSSP1 {
             Ensure = "Present"
             Key = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation"
             ValueName = "AllowFreshCredentials"
@@ -64,13 +64,13 @@ configuration prepareADconsole
             ValueType = "Dword"
         }
 
-        Registry CredSSP_2 {
+        Registry CredSSP2 {
             Ensure = "Present"
             Key = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\AllowFreshCredentials"
             ValueName = "1"
             ValueData = "WSMAN/*.$DomainName"
             ValueType = "String"
-            DependsOn = "[Registry]CredSSP_1"
+            DependsOn = "[Registry]CredSSP1"
         }
 
         LocalConfigurationManager 
