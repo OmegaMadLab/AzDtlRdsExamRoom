@@ -12,7 +12,10 @@ param (
     [string] $StudentVmPrefix,
     
     [Parameter(Mandatory)]
-    [int] $StudentVmNumber    
+    [int] $StudentVmNumber,
+
+    [Parameter(Mandatory)]
+    [int] $ExamRoomNumber
 )
 
 $securePass = ConvertTo-SecureString $DomainAdminPassword -AsPlainText -Force
@@ -97,3 +100,32 @@ $ScriptBlock = {
 }
 
 Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($DomainAdminName) -Verbose
+
+Install-Module AzureAD -SkipPublisherCheck -Force -Confirm:$false
+Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201
+Install-Module -Name NTFSSecurity -Force -Confirm:$false
+
+Connect-AzureAD -Credential $Credential
+
+$AADStudentsGroupName = "ExamRoom0$ExamRoomNumber-Students"
+$AADTeachersGroupName = "ExamRoom-Teachers"
+
+$Users = Get-AzureADGroup -SearchString $AADStudentsGroupName | Get-AzureADGroupMember | Select-Object UserPrincipalName, Mail
+
+$Folder = New-Item "C:\ExamResults" -ItemType Directory
+Add-NTFSAccess $Folder -Account $AADTeachersGroupName -AccessRights Modify
+
+foreach($user in $users) {
+    if($user.UserPrincipalName -like '*#EXT#*') {
+        $UserName = $user.Mail
+    } else {
+        $UserName = $user.UserPrincipalName
+    }
+    $subfolder = New-Item -Path "$($folder.FullName)\$UserName" -ItemType Directory
+    $subfolder | Disable-NTFSAccessInheritance
+    Add-NTFSAccess $subfolder -Account $UserName -AccessRights Modify
+    Get-NTFSAccess $subfolder -Account "BUILTIN\Users" | Remove-NTFSAccess
+    Add-NTFSAccess $subfolder -Account "BUILTIN\Users" -AccessRights ListDirectory
+}
+
+New-SmbShare -Path $Folder -Name "ExamResults" -FullAccess "Domain Users", "Domain Computers"
