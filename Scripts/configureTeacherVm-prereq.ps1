@@ -6,8 +6,10 @@ param(
 
 Import-Module ServerManager
 
+
+# Enabling CredSSP to execute part of configureTeacherVM-prereq.ps1 script with domain credentials,
+# needed to configure RDS farm
 $delegate = "*.$DomainName"
-$wsman    = "WSMAN/*.$DomainName"
 
 Write-Output "Starting enabling CredSSP" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append	
 Enable-WSManCredSSP -Role Client -DelegateComputer $delegate -Force
@@ -18,18 +20,33 @@ Write-Output "Set TrustedHosts" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deploy
 Set-item wsman:localhost\client\trustedhosts -value $delegate -Force
 Write-Output "TrustedHosts setup completed" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 
-Write-Output "Enable CredSSP Fresh NTLM Only" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
-New-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation -Name AllowFreshCredentialsWhenNTLMOnly -Value 1 -PropertyType DWORD -Force | Out-Null
-New-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation -Name ConcatenateDefaults_AllowFreshNTLMOnly -Value 1 -PropertyType DWORD -Force | Out-Null
-New-Item -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation -Name AllowFreshCredentialsWhenNTLMOnly -Force | Out-Null
-New-ItemProperty -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\AllowFreshCredentialsWhenNTLMOnly -Name 1 -Value $wsman -PropertyType String -Force | Out-Null
-Write-Output "CredSSP Fresh NTLM Only enabled" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
+Write-Output "Enable CredSSP Fresh Credentials" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
+$allowed = @("WSMAN/*.$DomainName")
 
-#Install RDS Features
+$key = 'hklm:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation'
+if (!(Test-Path $key)) {
+    mkdir $key
+}
+New-ItemProperty -Path $key -Name AllowFreshCredentials -Value 1 -PropertyType Dword -Force            
+
+$key = Join-Path $key 'AllowFreshCredentials'
+if (!(Test-Path $key)) {
+    mkdir $key
+}
+$i = 1
+$allowed | ForEach-Object {
+    # Script does not take into account existing entries in this key
+    New-ItemProperty -Path $key -Name $i -Value $_ -PropertyType String -Force
+    $i++
+}
+Write-Output "CredSSP Fresh NTLM Credentials" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
+
+# Install RDS Features
 Write-Output "Installing RDS components..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 Install-WindowsFeature -Name 'RDS-Connection-Broker', 'RDS-Licensing', 'RDS-Web-Access', 'RSAT-RDS-Tools' -IncludeAllSubFeature -IncludeManagementTools 
 Write-Output "RDS Components installed" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 
+# Enable PS remoting and reboot
 Write-Output "Enabling PSRemoting..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 Enable-PSRemoting -Force -verbose
 Write-Output "PSRemoting Enabled" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
