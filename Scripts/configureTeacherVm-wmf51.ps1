@@ -1,8 +1,13 @@
 if(Test-Path "C:\Program Files (x86)") {
     if ($PSVersionTable.PSVersion.Major -lt 5 -and $PSVersionTable.PSVersion.Minor -lt 1) {
         Write-Output "Attempting to install required features..."
-        .\Win8.1AndW2K12R2-KB3191564-x64.msu /quiet /norestart
-        Write-Output "WMF 5.1 installed. Restarting system..."
+        
+        $process=".\Win8.1AndW2K12R2-KB3191564-x64.msu"
+        $args="/q /norestart"
+ 
+        Start-Process $process -ArgumentList $args -Wait
+
+        Write-Output "Setup completed. WMF version $($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor) is ready. Restarting system..."
         Restart-Computer -Force -Confirm:$false
     } else {
         Write-Output "The current version of PowerShell is newer or equal to 5.1."
