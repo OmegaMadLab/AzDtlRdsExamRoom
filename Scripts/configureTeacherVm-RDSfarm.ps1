@@ -127,6 +127,7 @@ Install-Module -Name NTFSSecurity -Force -Confirm:$false
 Write-Output "Required PS Modules installed" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 
 # Connect to AAD and get ExamRoom students from group membership
+# Getting this info from AAD since replication interval from AAD to AADS may lead to improper group membership results
 Write-Output "Connecting to AzureAD..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 Connect-AzureAD -Credential $Credential
 Write-Output "Connected to AzureAD" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
