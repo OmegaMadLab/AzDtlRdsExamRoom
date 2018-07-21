@@ -3,11 +3,21 @@ if(Test-Path "C:\Program Files (x86)") {
         Write-Output "Attempting to install required features..."
         
         $process=".\Win8.1AndW2K12R2-KB3191564-x64.msu"
-        $args="/q /norestart"
+        $args="/quiet /norestart"
  
         Start-Process $process -ArgumentList $args -Wait
 
-        Write-Output "Setup completed. WMF version $($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor) is ready. Restarting system..."
+        Do {
+            try {
+                Get-Hotfix -id kb3191564 -ErrorAction Stop
+                $found = $true
+            }
+            catch {
+                $found = $false
+            }
+        } Until ($found)
+
+        Write-Output "Setup completed. Restarting system..."
         Restart-Computer -Force -Confirm:$false
     } else {
         Write-Output "The current version of PowerShell is newer or equal to 5.1."
