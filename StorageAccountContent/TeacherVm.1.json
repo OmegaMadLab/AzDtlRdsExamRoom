@@ -1,0 +1,297 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "LabName": {
+           "type": "string",
+           "metadata": {
+                "description": "The name of the lab"
+            }
+        },
+        "LabVmPrefix": {
+           "type": "string",
+           "maxLength": 7, 
+           "metadata": {
+                "description": "The lab prefix which will be used to compose the name of VMs"
+            }
+        },
+        "SharedResourceGroupName": {
+           "type": "string",
+           "metadata": {
+                "description": "The name of the resource group which hosts shared resources"
+            }
+        },
+        "VnetName": {
+           "type": "string",
+           "metadata": {
+                "description": "The name of the virtual network"
+            }
+        },
+        "TimeZoneId": {
+            "type": "string",
+            "defaultValue": "UTC",
+            "metadata": {
+                 "description": "The timezone of the lab"
+             }
+         },
+         "LabVmStartupTime": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 5,
+            "defaultValue": "08:00",
+            "metadata": {
+                 "description": "Set 'Auto Start' policy: The time at which the Lab VMs will be automatically turned on (E.g. 09:00, 09:30)."
+             }
+         },
+         "LabVmStartupDay": {
+             "type": "string",
+             "minLength": 5,
+             "defaultValue": "Monday,Tuesday,Wednesday,Thursday,Friday",
+             "metadata": {
+                  "description": "Set 'Auto Start' policy: a comma-separated list of days on which the Lab VMs will be automatically turned on (E.g. monday,tuesday)."
+              }
+          },
+         "LabVmShutDownTime": {
+             "type": "string",
+             "minLength": 5,
+             "maxLength": 5,
+             "defaultValue": "20:00",
+             "metadata": {
+                  "description": "Set 'Auto Shutdown' policy: The UTC time at which the Lab VMs will be automatically shutdown (E.g. 17:30, 20:00)"
+              }
+         },
+        "ExamRoomNumber": {
+           "type": "int",
+           "metadata": {
+                "description": "The number of the exam room which will host the lab"
+            }
+        },
+        "TeacherVmSize": {
+           "type": "string",
+           "metadata": {
+                "description": "The size of the teacher's VM"
+            }
+        },
+        "TeacherVmIp": {
+           "type": "string",
+           "metadata": {
+                "description": "The static IP to assign to Teacher VM"
+            }
+        },
+        "NumberOfStudents": {
+            "type": "int",
+            "metadata": {
+                 "description": "The number of students which will join the exam room"
+             }
+        },
+        "OsVersion": {
+            "type": "string",
+            "allowedValues": [
+                "2012-R2-Datacenter",
+                "2016-Datacenter"
+            ],
+            "metadata": {
+                "description": "The operating system version for VMs"
+            }
+        },
+        "VmUserName": {
+            "type": "string",
+            "metadata": {
+                 "description": "The username used to create the VM and to join the domain"
+             }
+         },
+         "VmPassword": {
+             "type": "securestring",
+             "metadata": {
+                  "description": "The password used to create the VM and to join the domain"
+              }
+         },
+        "DomainDnsName": {
+            "type": "string",
+            "metadata": {
+                "description": "The domain to join (i.e. contoso.com)"
+            }
+        },
+        "DomainUserName": {
+            "type": "string",
+            "metadata": {
+                 "description": "The username used to create the VM and to join the domain"
+             }
+         },
+         "DomainPassword": {
+             "type": "securestring",
+             "metadata": {
+                  "description": "The password used to create the VM and to join the domain"
+              }
+         },
+        "TeacherOu": {
+            "type": "string",
+            "metadata": {
+                "description": "The DN of the organizational unit which will contains Students' computer objects"
+            }
+        },
+        "VmExpirationDate": {
+           "type": "string",
+           "metadata": {
+                "description": "Virtual machine expiration date (i.e. 2018-06-25T10:00:00.000Z)"
+            }
+        },
+        "VmStorageType": {
+           "type": "string",
+           "allowedValues": [
+               "Standard",
+               "Premium"
+           ],
+           "defaultValue": "Standard",
+           "metadata": {
+                "description": "The type of storage used for VMs"
+            }
+        }
+    },
+    "variables": {
+        "ExamRoomID": "[padLeft(string(parameters('ExamRoomNumber')), 2, '0')]",
+        "VnetID": "[resourceId(parameters('SharedResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('VnetName'))]",
+        "TeacherSubnetName": "[concat('ExamRoom', variables('ExamRoomID'), '-TeacherSubnet')]",
+        "TeacherSubnetID": "[resourceId(parameters('SharedResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('VnetName'), variables('TeacherSubnetName'))]",
+        "TeacherScriptFileUris1": "[[\"https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/configureTeacherVm-wmf51.ps1\",\"https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/Win8.1AndW2K12R2-KB3191564-x64.msu\"]",
+        "TeacherScriptToRun1": "configureTeacherVm-wmf51.ps1",
+        "TeacherRunScriptArguments1": "",
+        "TeacherScriptFileUris2": "[[\"https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/testwmf.ps1\"]",
+        "TeacherScriptToRun2": "testwmf.ps1",
+        "TeacherRunScriptArguments2": "",
+        "TeacherScriptFileUris3": "[[\"https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/configureTeacherVm-RDSfarm.ps1\",\"https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/New-ServerManagerConfig.ps1\",\"https://raw.githubusercontent.com/OmegaMadLab/AzDtlRdsExamRoom/master/Scripts/Set-ServerManagerConfig.ps1\"]",
+        "TeacherScriptToRun3": "configureTeacherVm-RDSfarm.ps1",
+        "TeacherRunScriptArguments3": "[concat('-StudentVmPrefix \"', parameters('LabVmPrefix') ,'\" -StudentVmNumber ' , parameters('NumberOfStudents'), ' -DomainName \"', parameters('DomainDnsName'), '\" -DomainAdminName \"', parameters('DomainUserName'), '\" -DomainAdminPassword \"', parameters('DomainPassword'), '\" -ExamRoomNumber \"', parameters('ExamRoomNumber') ,'\"')]"
+    },
+    "resources": [       
+        {
+            "apiVersion": "2016-05-15",
+            "type": "Microsoft.DevTestLab/labs/virtualmachines",
+            "name": "[concat(parameters('LabName'), '/', parameters('LabVmPrefix'), '-Tchr')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "AutoStartOn": "true"
+            },
+            "properties": {
+                "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('LabName'), concat(parameters('LabName'), '-ExamRoomVnet'))]",
+                "notes": "Teacher VM",
+                "galleryImageReference": {
+                    "offer": "WindowsServer",
+                    "publisher": "MicrosoftWindowsServer",
+                    "sku": "[parameters('OsVersion')]",
+                    "osType": "Windows",
+                    "version": "latest"
+                },
+                "size": "[parameters('TeacherVmSize')]",
+                "userName": "[parameters('VmUserName')]",
+                "password": "[parameters('VmPassword')]",
+                "isAuthenticationWithSshKey": false,
+                "artifacts": [
+                    {
+                        "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-run-powershell')]",
+                        "parameters": [
+                            {
+                                "name": "scriptFileUris",
+                                "value": "[variables('TeacherScriptFileUris1')]"
+                            },
+                            {
+                                "name": "scriptToRun",
+                                "value": "[variables('TeacherScriptToRun1')]"
+                            },
+                            {
+                                "name": "scriptArguments",
+                                "value": "[variables('TeacherRunScriptArguments1')]"
+                            }
+                        ]
+                    },
+                    {
+                        "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-run-powershell')]",
+                        "parameters": [
+                            {
+                                "name": "scriptFileUris",
+                                "value": "[variables('TeacherScriptFileUris2')]"
+                            },
+                            {
+                                "name": "scriptToRun",
+                                "value": "[variables('TeacherScriptToRun2')]"
+                            },
+                            {
+                                "name": "scriptArguments",
+                                "value": "[variables('TeacherRunScriptArguments2')]"
+                            }
+                        ]
+                    }
+                ],
+                "labSubnetName": "[variables('TeacherSubnetName')]",
+                "disallowPublicIpAddress": true,
+                "storageType": "[parameters('VmStorageType')]",
+                "allowClaim": true,
+                "expirationDate": "[parameters('VmExpirationDate')]",
+                "networkInterface": {
+                    "privateIpAddress": "[parameters('TeacherVmIp')]",
+                    "sharedPublicIpAddressConfiguration": {
+                      "inboundNatRules": [
+                        {
+                          "transportProtocol": "Tcp",
+                          "backendPort": 3389
+                        }
+                      ]
+                    }
+                  }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "updateLabPolicy",
+            "dependsOn": [
+                "[resourceId('Microsoft.DevTestLab/labs/VirtualMachines', parameters('LabName'), concat(parameters('LabVmPrefix'), '-Tchr'))]"
+            ],
+            "properties": {
+              "mode": "Incremental",
+              "parameters": {},
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {},
+                "variables": {},
+                "resources": [
+                    {
+                        "apiVersion": "2016-05-15",
+                        "name": "[concat(parameters('LabName'), '/LabVmAutoStart')]",
+                        "type": "Microsoft.DevTestLab/labs/schedules",
+                        "dependsOn": [],
+                        "properties": {
+                            "status": "Enabled",
+                            "timeZoneId": "[parameters('TimeZoneId')]",
+                            "weeklyRecurrence": {
+                                "time": "[replace(parameters('LabVmStartupTime'),':','')]",
+                                "weekdays": "[array(split(replace(parameters('LabVmStartupDay'), ' ', ''), ','))]"
+                            },
+                            "taskType": "LabVmsStartupTask"
+                        }
+                    },
+                    {
+                        "apiVersion": "2016-05-15",
+                        "name": "[concat(parameters('LabName'), '/LabVmsShutdown')]",
+                        "type": "Microsoft.DevTestLab/labs/schedules",
+                        "dependsOn": [],
+                        "properties": {
+                            "status": "Enabled",
+                            "timeZoneId": "[parameters('TimeZoneId')]",
+                            "taskType": "LabVmsShutdownTask",
+                            "dailyRecurrence": {
+                                "time": "[replace(parameters('LabVmShutDownTime'),':','')]"
+                            }
+                        }
+                    }
+                ],
+                "outputs": {}
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
+
+
