@@ -18,12 +18,10 @@ param (
     [int] $ExamRoomNumber
 )
 
-$DomainAdminFullName = "$DomainAdminName@$Domainname"
-
 $securePass = ConvertTo-SecureString $DomainAdminPassword -AsPlainText -Force
-$Credential = New-Object System.Management.Automation.PSCredential ($DomainAdminFullName, $securePass)
+$Credential = New-Object System.Management.Automation.PSCredential ($DomainAdminName, $securePass)
 
-Add-LocalGroupMember -Group "Administrators" -Member $DomainAdminFullName
+Add-LocalGroupMember -Group "Administrators" -Member $DomainAdminName
 
 ### Configure RDS base deployment
 #Compose Student VMs array
