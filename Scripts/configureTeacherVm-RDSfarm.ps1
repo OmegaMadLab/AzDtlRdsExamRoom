@@ -121,9 +121,9 @@ Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($Dom
 
 # Installing PS Modules for AAD and NTFS permission management
 Write-Output "Installing required PS Modules..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
-Install-Module AzureAD -SkipPublisherCheck -Force -Confirm:$false
-Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201
-Install-Module -Name NTFSSecurity -Force -Confirm:$false
+Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201 -Verbose
+Install-Module AzureAD -SkipPublisherCheck -Force -Confirm:$false -Verbose
+Install-Module -Name NTFSSecurity -Force -Confirm:$false -Verbose
 Write-Output "Required PS Modules installed" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 
 # Connect to AAD and get ExamRoom students from group membership
