@@ -1,20 +1,20 @@
 param (
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [string] $DomainName,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [string] $DomainAdminName,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [string] $DomainAdminPassword,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [string] $StudentVmPrefix,
     
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [int] $StudentVmNumber,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [int] $ExamRoomNumber
 )
 
