@@ -21,6 +21,7 @@ param (
 $securePass = ConvertTo-SecureString $DomainAdminPassword -AsPlainText -Force
 $Credential = New-Object System.Management.Automation.PSCredential ($DomainAdminName, $securePass)
 
+# Configure AADDS Admin as local admin
 Add-LocalGroupMember -Group "Administrators" -Member $DomainAdminName
 
 ### Configure RDS base deployment
