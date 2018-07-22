@@ -27,16 +27,28 @@ $key = 'hklm:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation'
 if (!(Test-Path $key)) {
     mkdir $key
 }
-New-ItemProperty -Path $key -Name AllowFreshCredentials -Value 1 -PropertyType Dword -Force            
+New-ItemProperty -Path $key -Name AllowFreshCredentials -Value 1 -PropertyType Dword -Force    
+New-ItemProperty -Path $key -Name AllowFreshCredentialsWhenNTLMOnly -Value 1 -PropertyType Dword -Force    
 
-$key = Join-Path $key 'AllowFreshCredentials'
-if (!(Test-Path $key)) {
-    mkdir $key
+$keyFresh = Join-Path $key 'AllowFreshCredentials'
+if (!(Test-Path $keyFresh)) {
+    mkdir $keyFresh
 }
 $i = 1
 $allowed | ForEach-Object {
     # Script does not take into account existing entries in this key
-    New-ItemProperty -Path $key -Name $i -Value $_ -PropertyType String -Force
+    New-ItemProperty -Path $keyFresh -Name $i -Value $_ -PropertyType String -Force
+    $i++
+}
+
+$keyFreshNTLM = Join-Path $key 'AllowFreshCredentialsWhenNTLMOnly'
+if (!(Test-Path $keyFreshNTLM)) {
+    mkdir $keyFreshNTLM
+}
+$i = 1
+$allowed | ForEach-Object {
+    # Script does not take into account existing entries in this key
+    New-ItemProperty -Path $keyFreshNTLM -Name $i -Value $_ -PropertyType String -Force
     $i++
 }
 Write-Output "CredSSP Fresh NTLM Credentials" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
