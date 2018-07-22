@@ -121,9 +121,9 @@ Invoke-Command -Session $PsSession -ScriptBlock $ScriptBlock -ArgumentList ($Dom
 
 # Installing PS Modules for AAD and NTFS permission management
 Write-Output "Installing required PS Modules..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
-Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201 -Verbose
-Install-Module AzureAD -SkipPublisherCheck -Force -Confirm:$false -Verbose
-Install-Module -Name NTFSSecurity -Force -Confirm:$false -Verbose
+Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201
+Install-Module AzureAD -SkipPublisherCheck -Force -Confirm:$false
+Install-Module -Name NTFSSecurity -Force -Confirm:$false
 Write-Output "Required PS Modules installed" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 
 # Connect to AAD and get ExamRoom students from group membership
@@ -163,7 +163,7 @@ New-SmbShare -Path $Folder -Name "ExamResults" -FullAccess "Domain Users", "Doma
 Write-Output "ExamResults folder structure created" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
 
 # Disable CredSSP to restore security settings
-Write-Output "Disabling CredSSP..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
-Disable-WSManCredSSP -Role Client
-Disable-WSManCredSSP -Role Server
-Write-Output "CredSSP disabled" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
+# Write-Output "Disabling CredSSP..." | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
+# Disable-WSManCredSSP -Role Client
+# Disable-WSManCredSSP -Role Server
+# Write-Output "CredSSP disabled" | Out-File -FilePath 'C:\WINDOWS\Temp\rds_deployment.log' -Append
