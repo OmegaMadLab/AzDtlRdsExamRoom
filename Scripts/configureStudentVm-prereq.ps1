@@ -1,9 +1,10 @@
 [CmdletBinding()]
 
 param (
+    [Parameter(Mandatory=$true)]
     [string]$TeacherVmIp,
 
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory=$true)]
     [string] $DomainAdminName
 )
 

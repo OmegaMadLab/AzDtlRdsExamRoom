@@ -29,7 +29,7 @@ Add-LocalGroupMember -Group "Administrators" -Member $DomainAdminName
 $RdsHosts = @()
 for ($i = 0; $i -lt $StudentVmNumber; $i++) {
     $VmIndex = ($i.ToString()).PadLeft(2,"0")
-    $RdsHosts += "$StudentVmPrefix$VmIndex.$DomainName"
+    $RdsHosts += "$StudentVmPrefix-Stdn$VmIndex.$DomainName"
 }
 
 #Define RDS Roles servername
