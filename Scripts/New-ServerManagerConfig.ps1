@@ -2,7 +2,7 @@ param (
     [string] $DomainName,
     [string] $RdsVm,
     [string] $StudentVmPrefix,
-    [int] $StudentVmNumber    
+    [int] $StudentVmNumber
 )
 
 [xml]$xml = @"
@@ -31,8 +31,8 @@ for ($i = 0; $i -lt $StudentVmNumber; $i++)
     else {
         $StudentServer = $xml.ServerList.ServerInfo.Clone()
     }
-    $StudentServer.name = $StudentVmPrefix + $i.ToString("D2") + "." + $DomainName
-    $xml.ServerList.AppendChild($StudentServer) 
+    $StudentServer.name = $StudentVmPrefix + '-Stdn' + $i.ToString("D2") + "." + $DomainName
+    $xml.ServerList.AppendChild($StudentServer)
 }
 
 if(!(Test-path("C:\ServerManagerConfig"))) {
