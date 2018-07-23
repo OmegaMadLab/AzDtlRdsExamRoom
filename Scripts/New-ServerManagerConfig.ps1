@@ -6,7 +6,7 @@ param (
 )
 
 [xml]$xml = @"
-<?xml version="1.0" encoding="utf-8"?><ServerList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" localhostName="" xmlns="urn:serverpool-schema"><ServerInfo name="" status="1" lastUpdateTime="2018-03-16T08:28:03.581998+00:00" locale="en-US" /></ServerList>
+<?xml version="1.0" encoding="utf-8"?><ServerList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" localhostName="" xmlns="urn:serverpool-schema"><ServerInfo name="" status="2" lastUpdateTime="0001-01-01T00:00:00" locale="en-US" /></ServerList>
 "@
 
 #local machine
@@ -17,7 +17,7 @@ $xml.ServerList.ServerInfo.name = $env:COMPUTERNAME + '.' + $DomainName
 if($env:COMPUTERNAME -ne $RdsVm) {
     $rdsServer = $xml.ServerList.ServerInfo.Clone()
     $rdsServer.name = $RdsVm + '.' + $DomainName
-    $rdsServer.status = "2"
+    $rdsServer.status = "1"
 
     $xml.ServerList.AppendChild($rdsServer)
 }
